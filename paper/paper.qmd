@@ -1,12 +1,12 @@
 ---
-title: "My title"
-subtitle: "My subtitle if needed"
+title: "Did Toronto’s Neighbourhood Improvement Areas Curb Crime?"
+subtitle: "An Analysis of Crime Reduction from 2014 to 2023"
 author: 
   - Harsh M Pareek
-thanks: "Code and data are available at: LINK."
+thanks: "Code and data are available at: https://github.com/HarshMPareek/Project1"
 date: today
 date-format: long
-abstract: "First sentence. Second sentence. Third sentence. Fourth sentence."
+abstract: "This paper explores whether the designation of Neighbourhood Improvement Areas (NIA) in Toronto has been effective in reducing crime rates from 2014 to 2023. Using crime data across multiple categories, such as assault, robbery, and bike theft, I aim to correlate the impact of NIA designation with changes in crime trends."
 format: pdf
 number-sections: true
 bibliography: references.bib
@@ -18,15 +18,16 @@ bibliography: references.bib
 #| message: false
 
 library(tidyverse)
-library(palmerpenguins)
 ```
 
 
 # Introduction
 
-You can and should cross-reference sections and sub-sections. We use @citeR and @rohan.
+In 2014, the City of Toronto designated 31 areas as Neighbourhood Improvement Areas (NIAs) under the Toronto Strong Neighbourhoods Strategy 2020 (TSNS2020). This initiative aimed to enhance the social and economic conditions in under-served neighborhoods by providing targeted resources. While the broader objectives of TSNS2020 encompass overall community development, this paper specifically examines the initiative’s impact on various crime rates, including assault, robbery, bike theft, break and enter, homicide, shooting, theft from motor vehicles, and theft over $5000.
 
-The remainder of this paper is structured as follows. @sec-data....
+This analysis uses crime data from 2014 to 2023, obtained from Open Data Toronto, to assess changes in these crime rates within the designated NIAs. The purpose is to evaluate whether the intervention has led to measurable decreases in these specific crime categories, thereby contributing to the overall safety and security of the residents.
+
+The paper is structured to first describe the dataset and statistical methods applied in the analysis (see @sec-data), followed by a presentation of the results. The discussion section (@sec-discussion) will interpret the significance of these findings in the context of policy effectiveness and community safety. Finally, the paper will conclude with recommendations for future urban policy based on the observed data trends.
 
 
 
