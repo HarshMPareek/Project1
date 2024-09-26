@@ -17,13 +17,13 @@ library(tidyverse)
 # Download Neighbourhood Improvement Areas data
 nia_package <- show_package("3b471f62-dc01-4a96-bb76-f794e4c6b860")
 nia_resources <- list_package_resources("3b471f62-dc01-4a96-bb76-f794e4c6b860")
-nia_datastore_resources <- filter(nia_resources, tolower(format) %in% c('csv', 'geojson'))
+nia_datastore_resources <- filter(nia_resources, tolower(format) %in% c("csv", "geojson"))
 nia_data <- filter(nia_datastore_resources, row_number() == 1) %>% get_resource()
 
 # Download Neighbourhood Crime Rates data
 crime_package <- show_package("neighbourhood-crime-rates")
 crime_resources <- list_package_resources("neighbourhood-crime-rates")
-crime_datastore_resources <- filter(crime_resources, tolower(format) %in% c('csv', 'geojson'))
+crime_datastore_resources <- filter(crime_resources, tolower(format) %in% c("csv", "geojson"))
 crime_data <- filter(crime_datastore_resources, row_number() == 1) %>% get_resource()
 
 #### Save data ####
