@@ -29,7 +29,7 @@ crime_data <- read_csv("../data/analysis_data/crime_statistics_nia_summary.csv")
 
 # Introduction {#sec-introduction}
 
-Urban crime significantly impacts safety, economic stability, and quality of life. In response, the **City of Toronto** launched the **Toronto Strong Neighbourhoods Strategy 2020 (TSNS 2020)** in 2014, identifying 31 **Neighbourhood Improvement Areas (NIAs)** to direct resources to communities most in need.
+Urban crime significantly impacts safety, economic stability, and quality of life. In response, the **City of Toronto** launched the **Toronto Strong Neighbourhoods Strategy 2020 (TSNS 2020)** in 2014, identifying 31 **Neighbourhood Improvement Areas (NIAs)** to direct resources to communities most in need. [@nia]
 
 The primary goal of TSNS 2020 is to improve social and economic conditions in these neighborhoods with the expectation of reducing crime. Despite years of investment, the effectiveness of these efforts remains uncertain. Additionally, the COVID-19 pandemic may have further influenced crime trends, complicating the assessment of the NIA initiative.
 
@@ -44,19 +44,20 @@ This paper is structured as follows: (@sec-data) discusses the data collection a
 # Data {#sec-data}
 
 ## Data Source and Selection {#sec-data-source}
-This study uses two datasets from the City of Toronto Open Data Portal to analyze the impact of Neighbourhood Improvement Areas (NIAs) on crime rates from 2014 to 2023. The first dataset includes annual crime counts for offenses like Assault, Auto Theft, Break and Enter, Robbery, Theft Over, Homicide, and Shooting. These crime rates are standardized per 100,000 population to allow comparisons across neighborhoods of different sizes.
+This study uses two datasets from the City of Toronto Open Data Portal [@citeopendatatoronto] to analyze the impact of Neighbourhood Improvement Areas (NIAs) on crime rates from 2014 to 2023. The first dataset includes annual crime counts for offenses like Assault, Auto Theft, Break and Enter, Robbery, Theft Over, Homicide, and Shooting. These crime rates are standardized per 100,000 population to allow comparisons across neighborhoods of different sizes.
 
 The second dataset identifies NIAs designated under the Toronto Strong Neighbourhoods Strategy 2020 (TSNS2020), established in 2014 to improve socio-economic conditions. It was chosen because it allows us to focus on designated neighborhoods where interventions occurred. These datasets enable time series analysis of crime trends across neighborhoods over nearly a decade.
 
 Other datasets, such as those providing neighborhood income levels or police presence statistics, could provide additional insights. However, these were either not available for the same time period or lacked the granularity needed for direct comparison with the NIA crime data
 
 ## Data Preparation {#sec-data-preparation}
-To ensure consistency, `AREA_NAME` fields in both datasets were standardized to lowercase for accurate merging by neighborhood names. The crime dataset was then filtered to include only NIA-designated neighborhoods, ensuring the analysis focused on these specific areas.
+To ensure consistency, `AREA_NAME` fields in both datasets were standardized using the `dplyr` package for data manipulation (@dplyr), `tidyr` for reshaping the data (@tidyr), and `janitor` for cleaning operations (@janitor). The `lubridate` package was used to handle date and time functions (@lubridate), and the `broom` package facilitated the tidy conversion of model outputs for easy analysis (@broom). The crime dataset was then filtered to include only NIA-designated neighborhoods, ensuring the analysis focused on these specific areas. Data cleaning and transformation were performed using the `tidyverse` suite of packages [@citetidyverse], including `lubridate` [@citelubridate].
 
 Crime data, originally in wide format with separate columns for each crime type and year, was reshaped into a long format. This restructuring allows for aggregation across different crime types and years. Finally, data was aggregated by NIA, year, and crime type to compute total counts for each crime annually.
 
 ## Summary Statistics {#sec-summary-statistics}
-Summary statistics were calculated to assess the central tendencies and dispersion of crime rates across the NIAs. Table @tbl-summarystats presents the mean, median, and standard deviation for each crime type, offering insights into typical crime levels and variability across neighborhoods. 
+Summary statistics were calculated to assess the central tendencies and dispersion of crime rates across the NIAs. Table @tbl-summarystats presents the mean, median, and standard deviation for each crime type, offering insights into typical crime levels and variability across neighborhoods. Linear regression models were estimated using `rstanarm` [@rstanarm], running in the R statistical environment [@citeR].
+
 
 To better understand trends, Figure @fig-crime_rate_plot visualizes the evolution of crime rates from 2014 to 2023, highlighting any significant patterns.
 
@@ -152,7 +153,7 @@ Below are the key findings from the crime data analysis in NIA neighborhoods:
   Homicide and shootings have shown relatively stable rates over the years, highlighting the need for sustained or adjusted strategies to address violent crimes more effectively.
 
 ## Model Justification
-Linear regression models were used to estimate crime rate trends over time. The model’s slope indicates the annual change in crime rates, enabling us to assess whether specific crimes are increasing or decreasing. By evaluating the statistical significance (p-values) and the strength of these trends (R-squared values), we determined which crime categories were most impacted by NIA interventions. This method supports data-driven adjustments to policy and community strategies.
+Linear regression models were used to estimate crime rate trends over time. The model’s slope indicates the annual change in crime rates, enabling us to assess whether specific crimes are increasing or decreasing. By evaluating the statistical significance (p-values) and the strength of these trends (R-squared values), we determined which crime categories were most impacted by NIA interventions. This method supports data-driven adjustments to policy and community strategies. We used the `broom` package (@broom) to convert model results into a tidy format, which helped in organizing the statistical outputs efficiently for further analysis.
 
 # Discussion {#sec-discussion}
 
