@@ -15,10 +15,6 @@ library(janitor)
 nia_data <- read_csv("data/raw_data/neighbourhood_improvement_areas.csv")
 crime_data <- read_csv("data/raw_data/neighbourhood_crime_rates.csv")
 
-#### Load the raw data ####
-crime_data <- read_csv("data/raw_data/neighbourhood_crime_rates.csv")
-nia_data <- read_csv("data/raw_data/neighbourhood_improvement_areas.csv")
-
 #### Filter Crime Data for NIA Areas by AREA_NAME ####
 nia_areas <- nia_data %>%
   select(AREA_NAME) %>%

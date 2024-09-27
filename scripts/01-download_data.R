@@ -14,13 +14,13 @@ library(tidyverse)
 
 #### Download data ####
 
-# Download Neighbourhood Improvement Areas data
+# Download Neighbourhood Improvement Areas data (Code from Open data Toronto)
 nia_package <- show_package("3b471f62-dc01-4a96-bb76-f794e4c6b860")
 nia_resources <- list_package_resources("3b471f62-dc01-4a96-bb76-f794e4c6b860")
 nia_datastore_resources <- filter(nia_resources, tolower(format) %in% c("csv", "geojson"))
 nia_data <- filter(nia_datastore_resources, row_number() == 1) %>% get_resource()
 
-# Download Neighbourhood Crime Rates data
+# Download Neighbourhood Crime Rates data (Code from Open data Toronto)
 crime_package <- show_package("neighbourhood-crime-rates")
 crime_resources <- list_package_resources("neighbourhood-crime-rates")
 crime_datastore_resources <- filter(crime_resources, tolower(format) %in% c("csv", "geojson"))

@@ -3,10 +3,10 @@ title: "Did Toronto’s Neighbourhood Improvement Areas Curb Crime?"
 subtitle: "An Analysis of Crime Reduction from 2014 to 2023"
 author: 
   - Harsh M Pareek
-thanks: "Code and data are available at: https://github.com/HarshMPareek/Project1"
+thanks: "Code and data are available at: https://github.com/HarshMPareek/Toronto_NIA_Crime"
 date: today
 date-format: long
-abstract: "This paper explores whether the designation of Neighbourhood Improvement Areas (NIA) in Toronto has been effective in reducing crime rates from 2014 to 2023. Using crime data across multiple categories, such as assault, robbery, and bike theft, I aim to correlate the impact of NIA designation with changes in crime trends."
+abstract: "This study examines whether Toronto's Neighbourhood Improvement Areas (NIAs) have effectively reduced crime since designated in 2014. By analyzing crime rates over several years since designation in these communities, we found that robberies have significantly decreased, but thefts from motor vehicles and thefts over $5,000 have significantly increased. These findings suggest that while NIAs may help lower certain violent crimes, they might not be addressing property and other crimes effectively. Understanding these trends is crucial for urban planners and policymakers to improve community programs and enhance the effectiveness of NIAs in reducing all types of crime."
 format: pdf
 number-sections: true
 bibliography: references.bib
@@ -17,85 +17,158 @@ bibliography: references.bib
 #| warning: false
 #| message: false
 
+# Load necessary packages
 library(tidyverse)
+library(knitr)
+library(kableExtra)
+library(ggplot2)
+
+crime_data <- read_csv("../data/analysis_data/crime_statistics_nia_summary.csv")
 ```
 
 
-# Introduction
+# Introduction {#sec-introduction}
 
-In 2014, the City of Toronto designated 31 areas as Neighbourhood Improvement Areas (NIAs) under the Toronto Strong Neighbourhoods Strategy 2020 (TSNS2020). This initiative aimed to enhance the social and economic conditions in under-served neighborhoods by providing targeted resources. While the broader objectives of TSNS2020 encompass overall community development, this paper specifically examines the initiative’s impact on various crime rates, including assault, robbery, bike theft, break and enter, homicide, shooting, theft from motor vehicles, and theft over $5000.
+Urban crime significantly impacts safety, economic stability, and quality of life. In response, the **City of Toronto** launched the **Toronto Strong Neighbourhoods Strategy 2020 (TSNS 2020)** in 2014, identifying 31 **Neighbourhood Improvement Areas (NIAs)** to direct resources to communities most in need.
 
-This analysis uses crime data from 2014 to 2023, obtained from Open Data Toronto, to assess changes in these crime rates within the designated NIAs. The purpose is to evaluate whether the intervention has led to measurable decreases in these specific crime categories, thereby contributing to the overall safety and security of the residents.
+The primary goal of TSNS 2020 is to improve social and economic conditions in these neighborhoods with the expectation of reducing crime. Despite years of investment, the effectiveness of these efforts remains uncertain. Additionally, the COVID-19 pandemic may have further influenced crime trends, complicating the assessment of the NIA initiative.
 
-The paper is structured to first describe the dataset and statistical methods applied in the analysis (see @sec-data), followed by a presentation of the results. The discussion section (@sec-discussion) will interpret the significance of these findings in the context of policy effectiveness and community safety. Finally, the paper will conclude with recommendations for future urban policy based on the observed data trends.
+This paper investigates crime trends in Toronto's NIAs from 2014 to 2023. Crime data was sourced from OpenDataToronto, focusing on categories such as assault, robbery, bike theft, break and enter, homicide, shooting, and motor vehicle theft. Statistical models were applied to evaluate the impact of NIA interventions.
 
+The results show a significant reduction in **robbery rates**, suggesting success in addressing certain crimes. However, increases in **theft from motor vehicles** and **theft over $5,000** indicate that some crime types have not benefited from the initiative. These mixed results suggest a need for further adjustments to the program.
 
+While the NIA initiative aims for broader socio-economic improvements, evaluating its impact on crime reduction is crucial to inform future urban planning and resource allocation strategies.
+
+This paper is structured as follows: (@sec-data) discusses the data collection and cleaning process along with summary statistics, measurement implementation, (@sec-results) explains the the results we got and justification of out model, (@sec-discussion)  presents the results of the analysis, and finally (@sec-conclusion) discusses the broader implications for urban policy and concludes with recommendations for future planning along with some limitations of this model.
 
 # Data {#sec-data}
 
-Some of our data is of penguins (@fig-bills), from @palmerpenguins.
+## Data Source and Selection {#sec-data-source}
+This study uses two datasets from the City of Toronto Open Data Portal to analyze the impact of Neighbourhood Improvement Areas (NIAs) on crime rates from 2014 to 2023. The first dataset includes annual crime counts for offenses like Assault, Auto Theft, Break and Enter, Robbery, Theft Over, Homicide, and Shooting. These crime rates are standardized per 100,000 population to allow comparisons across neighborhoods of different sizes.
+
+The second dataset identifies NIAs designated under the Toronto Strong Neighbourhoods Strategy 2020 (TSNS2020), established in 2014 to improve socio-economic conditions. It was chosen because it allows us to focus on designated neighborhoods where interventions occurred. These datasets enable time series analysis of crime trends across neighborhoods over nearly a decade.
+
+Other datasets, such as those providing neighborhood income levels or police presence statistics, could provide additional insights. However, these were either not available for the same time period or lacked the granularity needed for direct comparison with the NIA crime data
+
+## Data Preparation {#sec-data-preparation}
+To ensure consistency, `AREA_NAME` fields in both datasets were standardized to lowercase for accurate merging by neighborhood names. The crime dataset was then filtered to include only NIA-designated neighborhoods, ensuring the analysis focused on these specific areas.
+
+Crime data, originally in wide format with separate columns for each crime type and year, was reshaped into a long format. This restructuring allows for aggregation across different crime types and years. Finally, data was aggregated by NIA, year, and crime type to compute total counts for each crime annually.
+
+## Summary Statistics {#sec-summary-statistics}
+Summary statistics were calculated to assess the central tendencies and dispersion of crime rates across the NIAs. Table @tbl-summarystats presents the mean, median, and standard deviation for each crime type, offering insights into typical crime levels and variability across neighborhoods. 
+
+To better understand trends, Figure @fig-crime_rate_plot visualizes the evolution of crime rates from 2014 to 2023, highlighting any significant patterns.
+
+```{r}
+#| label: tbl-summarystats
+#| echo: false
+#| tbl-cap: "Summary Statistics of Crime Rates (per 100,000 population)"
+
+# Reshape the data for analysis
+summary_stats <- crime_data %>%
+  pivot_longer(
+    cols = ends_with("_RATE"), 
+    names_to = "crime_type", 
+    values_to = "crime_rate"
+  ) %>%
+  group_by(crime_type) %>%
+  summarize(
+    Mean = mean(crime_rate, na.rm = TRUE),
+    Median = median(crime_rate, na.rm = TRUE),
+    `Standard Deviation` = sd(crime_rate, na.rm = TRUE),
+    .groups = 'drop'
+  )
+
+# Render the table with kable
+kable(summary_stats, format = "latex", booktabs = TRUE) %>%
+  kable_styling(
+    latex_options = c("striped", "scale_down", "hold_position")
+  ) %>%
+  column_spec(1, bold = TRUE, border_right = TRUE) %>%
+  row_spec(0, bold = TRUE, background = "#D3D3D3")
+
+```
+
+```{r}
+#| label: fig-crime_rate_plot
+#| tbl-cap: Summary Statistics of Crime Rates (per 100,000 population)
+#| echo: false
+
+# Ensure 'year' is numeric
+crime_data$year <- as.numeric(crime_data$year)
+
+# Reshape data to focus only on RATE metrics
+crime_long <- crime_data %>%
+  pivot_longer(
+    cols = ends_with("_RATE"),  # Select columns that end with '_RATE'
+    names_to = "crime_type",
+    values_to = "crime_rate"
+  ) %>%
+  mutate(crime_type = str_replace(crime_type, "_RATE", ""))  # Remove '_RATE' for cleaner axis labels
+
+# Aggregate data to get average crime rates per year across all NIA neighborhoods
+crime_rates <- crime_long %>%
+  group_by(year, crime_type) %>%
+  summarize(avg_rate = mean(crime_rate, na.rm = TRUE), .groups = 'drop')
+
+# Plotting the trend for each crime type with a linear model
+trend_plot <- ggplot(crime_rates, aes(x = year, y = avg_rate)) +
+  geom_line() +  # Line graph for trends
+  geom_smooth(method = "lm", se = FALSE, color = "red", formula = y ~ x) +  # Add linear trend line
+  facet_wrap(~ crime_type, scales = "free_y") +  # Create separate plots for each crime type
+  scale_x_continuous(breaks = seq(min(crime_rates$year), max(crime_rates$year), by = 1)) + # Explicitly set breaks
+  labs(
+    title = "Crime Rate Trends from 2014 to 2023",
+    x = "Year",
+    y = "Average Crime Rate per 100,000"
+  ) +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5), axis.text.x = element_text(angle = 45, hjust = 1))  # Improve layout
+
+trend_plot
+```
+
+## Measurement Implementation {#measurement-implementation}
+Crime rates per 100,000 population were used to standardize comparisons across neighborhoods with varying population sizes. This approach ensures that crime rates are proportional and comparable, eliminating the bias that larger populations might introduce in raw crime counts. By standardizing the data, we can more accurately assess the impact of the NIA initiative on crime trends, as it allows for a fair evaluation of crime levels relative to the population size of each neighborhood.
+
+Using standardized crime rates is particularly important in assessing socio-economic interventions like the NIAs. It provides a meaningful metric to evaluate whether the initiatives correlate with changes in crime rates, independent of population growth or decline. This measurement approach facilitates a more precise analysis of the effectiveness of the NIA program in influencing crime trends within the designated neighborhoods.
+
+# Statistical results and model justification {#sec-results}
+
+## Overview
+The analysis of crime rates from 2014 to 2023 in Toronto's Neighbourhood Improvement Areas (NIAs) reveals mixed results across different crime categories. The effects of socio-economic interventions and broader urban policies vary, with external factors such as the COVID-19 pandemic potentially contributing to shifts in certain crime trends, though that is beyond the scope of this study.
+
+## Key Obersvations
+Below are the key findings from the crime data analysis in NIA neighborhoods:
+
+- **Increase in Assault and Theft-Related Crimes:**  
+  Assaults, theft from motor vehicles, and theft over $5,000 have shown upward trends, indicating that these neighborhoods still face significant challenges in preventing these crimes. 
+
+- **Decrease in Robbery and Break and Enter:**  
+  Robbery and break and enter crimes have declined, suggesting that interventions in these areas may have had some success.
+
+- **Stable Rates of Severe Crimes:**  
+  Homicide and shootings have shown relatively stable rates over the years, highlighting the need for sustained or adjusted strategies to address violent crimes more effectively.
+
+## Model Justification
+Linear regression models were used to estimate crime rate trends over time. The model’s slope indicates the annual change in crime rates, enabling us to assess whether specific crimes are increasing or decreasing. By evaluating the statistical significance (p-values) and the strength of these trends (R-squared values), we determined which crime categories were most impacted by NIA interventions. This method supports data-driven adjustments to policy and community strategies.
+
+# Discussion {#sec-discussion}
+
+## Crime Trends in NIAs {#sec-discussion-crime-trends}
+The regression analysis of crime rates in Toronto's Neighbourhood Improvement Areas (NIAs) from 2014 to 2023 highlights significant patterns across different crime categories. Ad we saw in section (@sec-results) property crimes such as robbery and break and enter declined noticeably, particularly after 2020, likely influenced by the COVID-19 pandemic's impact on public behavior and social interactions. This suggests that external societal changes, alongside NIA interventions, played a role in reducing opportunities for these types of crimes. 
+
+However, violent crimes, such as homicide and shootings, remained relatively stable over time, indicating that the TSNS2020 interventions may not have effectively addressed these more severe offenses. This points to the need for more targeted strategies that tackle the root causes of violent crime. In contrast, theft-related crimes, particularly theft from motor vehicles, increased, signaling that criminal behavior may be adapting in response to certain interventions. This finding underscores the ongoing challenges urban policymakers face in keeping pace with evolving crime tactics.
+
+## Broader Implications {#sec-broader-implications}
+Several broader factors emerged during the analysis that could influence future policy decisions. The COVID-19 pandemic had a significant impact on crime rates, providing insights into how large-scale societal disruptions can alter criminal activity. Additionally, the cyclical nature of certain crimes, such as shootings and homicides, suggests that other variables—potentially cultural, relational, or linked to deeper socio-economic issues—contribute to these persistent crime patterns. These observations indicate that while NIAs have had some success in curbing specific crimes, broader societal factors must also be addressed to achieve sustained crime reduction.
 
 
-Talk more about it.
-
-And also planes (@fig-planes). (You can change the height and width, but don't worry about doing that until you have finished every other aspect of the paper - Quarto will try to make it look nice and the defaults usually work well once you have enough text.)
+# Conclusion {#sec-conclusion}
 
 
-
-Talk way more about it. 
-
-
-
-# Model
-
-The goal of our modelling strategy is twofold. Firstly,...
-
-Here we briefly describe the Bayesian analysis model used to investigate... Background details and diagnostics are included in [Appendix -@sec-model-details].
-
-## Model set-up
-
-Define $y_i$ as the number of seconds that the plane remained aloft. Then $\beta_i$ is the wing width and $\gamma_i$ is the wing length, both measured in millimeters.  
-
-\begin{align} 
-y_i|\mu_i, \sigma &\sim \mbox{Normal}(\mu_i, \sigma) \\
-\mu_i &= \alpha + \beta_i + \gamma_i\\
-\alpha &\sim \mbox{Normal}(0, 2.5) \\
-\beta &\sim \mbox{Normal}(0, 2.5) \\
-\gamma &\sim \mbox{Normal}(0, 2.5) \\
-\sigma &\sim \mbox{Exponential}(1)
-\end{align}
-
-We run the model in R [@citeR] using the `rstanarm` package of @rstanarm. We use the default priors from `rstanarm`.
-
-
-### Model justification
-
-We expect a positive relationship between the size of the wings and time spent aloft. In particular...
-
-We can use maths by including latex between dollar signs, for instance $\theta$.
-
-
-# Results
-
-Our results are summarized in @tbl-modelresults.
-
-
-
-
-
-# Discussion
-
-## First discussion point {#sec-first-point}
-
-If my paper were 10 pages, then should be be at least 2.5 pages. The discussion is a chance to show off what you know and what you learnt from all this. 
-
-## Second discussion point
-
-## Third discussion point
-
-## Weaknesses and next steps
-
-Weaknesses and next steps should also be included.
+While NIAs have reduced some crimes, their overall impact is mixed, with violent crimes remaining steady and thefts increasing. This highlights the need for strategies addressing socio-economic factors and community development. The influence of external factors, like COVID-19, suggests NIAs alone are insufficient for significant crime reduction. Future research should explore underreporting and deeper societal dynamics to improve urban crime prevention efforts.
 
 \newpage
 
@@ -104,26 +177,8 @@ Weaknesses and next steps should also be included.
 # Appendix {-}
 
 
-# Additional data details
-
-# Model details {#sec-model-details}
-
-## Posterior predictive check
-
-In @fig-ppcheckandposteriorvsprior-1 we implement a posterior predictive check. This shows...
-
-In @fig-ppcheckandposteriorvsprior-2 we compare the posterior with the prior. This shows... 
-
-
-
-## Diagnostics
-
-@fig-stanareyouokay-1 is a trace plot. It shows... This suggests...
-
-@fig-stanareyouokay-2 is a Rhat plot. It shows... This suggests...
-
-
-
+# Limitations
+This analysis has some limitations. First, it lacks a comparison with non-NIA neighborhoods, which limits our ability to isolate the NIA effect. Second, there is no data prior to 2014, preventing a baseline assessment before NIA designation. The use of linear models oversimplifies crime dynamics, ignoring potential non-linear trends. Additionally, key socio-economic factors, policing strategies, and the impact of COVID-19 were not incorporated, which could have influenced crime rates.I would keep trying to fix them by finding additonal data sources but some are not yet available on open data toronto and also they have some mismatches on site and dataset, where they say 31 nighbourhoods on website but dataset has 33.
 
 
 \newpage

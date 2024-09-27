@@ -14,7 +14,7 @@ library(tidyverse)
 #### Test data ####
 
 #### Load cleaned data ####
-crime_cleaned <- read_csv("data/analysis_data/crime_statistics_nia.csv")
+crime_cleaned <- read_csv("data/analysis_data/crime_statistics_nia_summary.csv")
 
 #### Test 1: Check that only NIA neighborhoods are included ####
 nia_data <- read_csv("data/raw_data/neighbourhood_improvement_areas.csv")
@@ -48,7 +48,12 @@ if (nrow(negative_values) == 0) {
 crime_summary_stats <- crime_cleaned %>%
   summarise(
     total_assaults = sum(across(starts_with("ASSAULT_"), ~ sum(.x, na.rm = TRUE))),
-    total_auto_thefts = sum(across(starts_with("AUTO_THEFT_"), ~ sum(.x, na.rm = TRUE))),
+    total_bikethefts = sum(across(starts_with("BIKETHEFT_"), ~ sum(.x, na.rm = TRUE))),
+    total_breakenters = sum(across(starts_with("BREAKENTER_"), ~ sum(.x, na.rm = TRUE))),
+    total_homicide = sum(across(starts_with("HOMICIDE_"), ~ sum(.x, na.rm = TRUE))),
+    total_shootings = sum(across(starts_with("SHOOTING_"), ~ sum(.x, na.rm = TRUE))),
+    total_theftfrommv = sum(across(starts_with("THEFTFROMMV_"), ~ sum(.x, na.rm = TRUE))),
+    total_theftover = sum(across(starts_with("THEFTOVER_"), ~ sum(.x, na.rm = TRUE))),
     total_robberies = sum(across(starts_with("ROBBERY_"), ~ sum(.x, na.rm = TRUE)))
   )
 
