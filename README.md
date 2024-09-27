@@ -8,6 +8,7 @@ The repo is structured as follows:
 
 - `data/raw_data/`: Contains the raw data as obtained from OpenDataToronto.
 - `data/analysis_data/`: Contains the cleaned dataset that was constructed.
+- - `data/simulated_data/`: Contains the simulated data.
 - `model/`: Contains the fitted models.
 - `other/`: Contains relevant details about LLM chat interactions, and plots.
 - `paper/`: Contains the files used to generate the paper, including the Quarto document, reference bibliography file, and the final PDF of the paper.
